@@ -1,0 +1,96 @@
+/* Dark Mode Variables */
+.dark-mode {
+  --primary: #3498db;
+  --accent: #f39c12;
+  --bg: #121826;
+  --card: #1e293b;
+  --muted: #94a3b8;
+  --text: #e2e8f0;
+}
+
+/* Toggle Switch */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  margin-left: 10px;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #0b5fa5;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "🌙";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  font-size: 12px;
+}
+
+input:checked + .slider {
+  background-color: #f39c12;
+}
+
+input:checked + .slider:before {
+  content: "☀️";
+  transform: translateX(30px);
+}
+
+/* Header adjustments for dark mode */
+.dark-mode header {
+  background: linear-gradient(90deg, #0b5fa5, #0a4f8a);
+}
+
+.dark-mode .muted {
+  color: var(--muted);
+}
+
+/* Table adjustments for dark mode */
+.dark-mode table {
+  color: var(--text);
+}
+
+.dark-mode thead tr {
+  background: #2d3748 !important;
+}
+
+.dark-mode tbody tr {
+  border-bottom-color: #374151 !important;
+}
+
+/* Form adjustments */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #2d3748;
+  border-color: #4a5568;
+  color: var(--text);
+}
+
+.dark-mode iframe {
+  filter: invert(0.9) hue-rotate(180deg);
+}
