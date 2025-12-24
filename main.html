@@ -374,10 +374,12 @@
   <div id="page-loader" class="page-loader">
     <div class="loader-content">
       <div class="bouncing-text">
-        <span>H</span>
-        <span>V</span>
-        <span>A</span>
-        <span>C</span>
+        <span>m</span>
+        <span>a</span>
+        <span>s</span>
+        <span>r</span>
+        <span>a</span>
+        <span>b<</span>
       </div>
       <div class="loading-dots">
         <div class="dot"></div>
@@ -467,20 +469,25 @@
     }
     
     .bouncing-text {
-      font-size: 3.5rem;
+      font-size: 4rem;
       font-weight: 800;
       margin-bottom: 20px;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
     }
     
     .bouncing-text span {
       display: inline-block;
-      animation: bounce 2s infinite;
-      margin: 0 5px;
+      animation: bounce 1.8s infinite;
+      margin: 0 3px;
+      text-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
     
-    .bouncing-text span:nth-child(2) { animation-delay: 0.1s; }
-    .bouncing-text span:nth-child(3) { animation-delay: 0.2s; }
-    .bouncing-text span:nth-child(4) { animation-delay: 0.3s; }
+    .bouncing-text span:nth-child(1) { animation-delay: 0.1s; color: #ff9e6d; }
+    .bouncing-text span:nth-child(2) { animation-delay: 0.2s; color: #ffb38a; }
+    .bouncing-text span:nth-child(3) { animation-delay: 0.3s; color: #ffc8a8; }
+    .bouncing-text span:nth-child(4) { animation-delay: 0.4s; color: #8babff; }
+    .bouncing-text span:nth-child(5) { animation-delay: 0.5s; color: #6a8fff; }
+    .bouncing-text span:nth-child(6) { animation-delay: 0.6s; color: #3498db; }
     
     .loading-dots {
       display: flex;
@@ -497,18 +504,29 @@
       animation: pulse 1.5s infinite;
     }
     
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
+    .dot:nth-child(1) { animation-delay: 0.2s; background: #ff9e6d; }
+    .dot:nth-child(2) { animation-delay: 0.4s; background: #8babff; }
+    .dot:nth-child(3) { animation-delay: 0.6s; background: #6a8fff; }
     
     /* Animations */
     @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
+      0%, 100% { 
+        transform: translateY(0) rotate(0deg); 
+      }
+      25% { 
+        transform: translateY(-25px) rotate(5deg); 
+      }
+      50% { 
+        transform: translateY(0) rotate(0deg); 
+      }
+      75% { 
+        transform: translateY(-10px) rotate(-5deg); 
+      }
     }
     
     @keyframes pulse {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 0.8; }
     }
     
     @keyframes float {
@@ -537,6 +555,15 @@
         transform: scale(4);
         opacity: 0;
       }
+    }
+    
+    @keyframes rainbow {
+      0% { color: #ff9e6d; }
+      20% { color: #ffb38a; }
+      40% { color: #ffc8a8; }
+      60% { color: #8babff; }
+      80% { color: #6a8fff; }
+      100% { color: #3498db; }
     }
     
     /* Enhanced Theme Toggle */
@@ -1110,12 +1137,14 @@
       .hero{grid-template-columns:1fr; text-align:center; gap:30px} 
       .contact-grid{grid-template-columns:1fr}
       .hero .media{height:300px; max-width:600px; margin:0 auto}
+      .bouncing-text{font-size:3.2rem}
     }
     @media(max-width:768px){ 
       h2{font-size:30px}
       section{padding:40px 0}
       .hero .intro h1{font-size:32px}
       nav a{margin-left:15px; font-size:14px}
+      .bouncing-text{font-size:2.8rem}
     }
     @media(max-width:520px){ 
       nav a:not(.cta){display:none} 
@@ -1123,6 +1152,11 @@
       .hero .intro h1{font-size:28px}
       .brand div:first-child{font-size:16px}
       h2{font-size:26px}
+      .bouncing-text{font-size:2.2rem}
+    }
+    @media(max-width:380px){
+      .bouncing-text{font-size:1.8rem}
+      .bouncing-text span{margin:0 2px}
     }
   </style>
 
@@ -1488,7 +1522,7 @@
     </div>
     <div style="text-align:center;margin-top:30px;color:#9fc7ff">
       کلیه حقوق مادی و معنوی این وب‌سایت محفوظ می‌باشد. © ۱۴۰۳
-      <div style="margin-top:12px">ساخته شده با ❤ توسط برسام</div>
+      <div style="margin-top:12px">ساخته شده با ❤ توسط <span style="color:#ff9e6d;font-weight:bold">barsam</span></div>
     </div>
   </footer>
 
