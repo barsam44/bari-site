@@ -1,4 +1,4 @@
-<!-- saved from url=(0094)file:///D:/about.html -->
+
 <html lang="fa" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <!-- Leaflet CSS -->
@@ -10,39 +10,107 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
   crossorigin=""></script>
+
+  <!-- Animate.css for additional animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   
 <script>
-  // Page loader hide
+  // Enhanced page loader with cute animation
   window.addEventListener('load', function(){
     const loader = document.getElementById('page-loader');
-    if(loader){ loader.classList.add('hidden'); setTimeout(()=>loader.remove(),900) }
+    if(loader){ 
+      loader.classList.add('hidden'); 
+      setTimeout(()=>loader.remove(),900);
+      
+      // Add entrance animation to first section
+      setTimeout(() => {
+        document.querySelector('section').classList.add('animate__animated', 'animate__fadeInUp');
+      }, 100);
+    }
   });
 
-  // Simple scroll reveal
+  // Enhanced scroll reveal with cute effects
   const revealEls = document.querySelectorAll('.reveal');
   const io = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
-      if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target) }
+      if(e.isIntersecting){ 
+        e.target.classList.add('visible'); 
+        
+        // Add different animations based on element type
+        if(e.target.classList.contains('value-card')) {
+          e.target.classList.add('animate__animated', 'animate__bounceIn');
+        } else if(e.target.classList.contains('team-member')) {
+          e.target.classList.add('animate__animated', 'animate__flipInX');
+        } else {
+          e.target.classList.add('animate__animated', 'animate__fadeInUp');
+        }
+        
+        io.unobserve(e.target);
+      }
     });
-  }, {threshold: 0.12});
-  revealEls.forEach(el=>io.observe(el));
+  }, {threshold: 0.08});
+  
+  revealEls.forEach(el=>{
+    el.classList.add('reveal');
+    io.observe(el);
+  });
 
-  // Smooth anchor scroll
+  // Smooth anchor scroll with cute easing
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
     a.addEventListener('click', function(e){
       const target = document.querySelector(this.getAttribute('href'));
-      if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}) }
+      if(target){ 
+        e.preventDefault(); 
+        target.scrollIntoView({
+          behavior:'smooth', 
+          block:'start',
+          duration: 1000
+        });
+        
+        // Add cute click effect
+        this.classList.add('clicked');
+        setTimeout(() => this.classList.remove('clicked'), 300);
+      }
     });
   });
 
-  // Add reveal class to key sections
-  document.querySelectorAll('section, .product, .project, .member, .card').forEach(el=>{
-    el.classList.add('reveal');
-  });
+  // Animated counter for statistics
+  function animateCounter(element, target, duration = 2000) {
+    const start = 0;
+    const increment = target / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        element.textContent = target + (element.textContent.includes('+') ? '+' : '');
+        clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(current) + (element.textContent.includes('+') ? '+' : '');
+      }
+    }, 16);
+  }
 
-  // Dark Mode Functionality
+  // Initialize counters when in view
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const numberElement = entry.target.querySelector('.stat-number');
+        if (numberElement && !numberElement.dataset.animated) {
+          const target = parseInt(numberElement.textContent);
+          if (!isNaN(target)) {
+            animateCounter(numberElement, target);
+            numberElement.dataset.animated = 'true';
+          }
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+
+  // Dark Mode Functionality with cute toggle animation
   function initDarkMode() {
     const toggle = document.getElementById('darkModeToggle');
+    const toggleIcon = document.querySelector('.toggle-icon');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     
     // Check localStorage or system preference
@@ -53,20 +121,41 @@
     if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
       document.documentElement.classList.add('dark-mode');
       if (toggle) toggle.checked = true;
+      if (toggleIcon) toggleIcon.textContent = '🌙';
       updateMapTheme(true);
     }
     
-    // Toggle dark mode
+    // Toggle dark mode with animation
     if (toggle) {
       toggle.addEventListener('change', function() {
+        // Add toggle animation
+        if (toggleIcon) {
+          toggleIcon.classList.add('toggling');
+          setTimeout(() => {
+            toggleIcon.classList.remove('toggling');
+          }, 300);
+        }
+        
         if (this.checked) {
           document.documentElement.classList.add('dark-mode');
+          document.documentElement.classList.add('transitioning');
+          if (toggleIcon) toggleIcon.textContent = '🌙';
           localStorage.setItem('theme', 'dark');
           updateMapTheme(true);
+          
+          setTimeout(() => {
+            document.documentElement.classList.remove('transitioning');
+          }, 500);
         } else {
           document.documentElement.classList.remove('dark-mode');
+          document.documentElement.classList.add('transitioning');
+          if (toggleIcon) toggleIcon.textContent = '☀️';
           localStorage.setItem('theme', 'light');
           updateMapTheme(false);
+          
+          setTimeout(() => {
+            document.documentElement.classList.remove('transitioning');
+          }, 500);
         }
       });
     }
@@ -74,45 +163,62 @@
     // Listen for system theme changes
     prefersDarkScheme.addEventListener('change', (e) => {
       const savedTheme = localStorage.getItem('theme');
-      // Only change if user hasn't manually set a preference
       if (!savedTheme) {
+        if (toggleIcon) {
+          toggleIcon.classList.add('toggling');
+          setTimeout(() => {
+            toggleIcon.classList.remove('toggling');
+          }, 300);
+        }
+        
         if (e.matches) {
           document.documentElement.classList.add('dark-mode');
           if (toggle) toggle.checked = true;
+          if (toggleIcon) toggleIcon.textContent = '🌙';
           updateMapTheme(true);
         } else {
           document.documentElement.classList.remove('dark-mode');
           if (toggle) toggle.checked = false;
+          if (toggleIcon) toggleIcon.textContent = '☀️';
           updateMapTheme(false);
         }
       }
     });
   }
 
-  // Initialize OpenStreetMap
+  // Initialize OpenStreetMap with cute marker
   function initMap() {
-    // مختصات دفتر مرکزی (تهران، مثال)
     const officeCoords = [35.6892, 51.3890];
-    
-    // ایجاد نقشه
     const map = L.map('osm-map').setView(officeCoords, 15);
     
-    // لایه استاندارد OpenStreetMap
+    // Standard layer
     const standardLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
     
-    // لایه تاریک برای حالت دارک مود
+    // Dark layer
     const darkLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
       attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     });
     
-    // اضافه کردن لایه اولیه
     standardLayer.addTo(map);
     
-    // ذخیره لایه‌ها برای تغییر در حالت دارک مود
+    // Cute custom icon
+    const cuteIcon = L.divIcon({
+      html: '<div class="cute-marker"><div class="pulse"></div>🏢</div>',
+      className: 'cute-marker-container',
+      iconSize: [40, 40],
+      iconAnchor: [20, 40]
+    });
+    
+    // Add marker with cute icon
+    const marker = L.marker(officeCoords, { icon: cuteIcon }).addTo(map);
+    marker.bindPopup("<b>شرکت صنایع تأسیسات و تهویه ایران</b><br>دفتر مرکزی").openPopup();
+    
+    L.control.scale().addTo(map);
+    
     window.mapLayers = {
       standard: standardLayer,
       dark: darkLayer,
@@ -120,14 +226,6 @@
       map: map
     };
     
-    // افزودن نشانگر
-    const marker = L.marker(officeCoords).addTo(map);
-    marker.bindPopup("<b>شرکت صنایع تأسیسات و تهویه ایران</b><br>دفتر مرکزی").openPopup();
-    
-    // افزودن کنترل اندازه‌گیری
-    L.control.scale().addTo(map);
-    
-    // چک کردن حالت دارک برای تنظیم لایه اولیه
     const isDarkMode = document.documentElement.classList.contains('dark-mode');
     if (isDarkMode) {
       map.removeLayer(standardLayer);
@@ -136,7 +234,7 @@
     }
   }
 
-  // تابع برای تغییر تم نقشه
+  // Update map theme
   function updateMapTheme(isDark) {
     if (!window.mapLayers) return;
     
@@ -153,20 +251,62 @@
     }
   }
 
+  // Add hover effects to cards
+  function initHoverEffects() {
+    const cards = document.querySelectorAll('.card, .value-card, .team-member');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.classList.add('hovering');
+      });
+      card.addEventListener('mouseleave', function() {
+        this.classList.remove('hovering');
+      });
+    });
+  }
+
   // Initialize when DOM is loaded
   document.addEventListener('DOMContentLoaded', function() {
     initDarkMode();
     initMap();
+    initHoverEffects();
+    
+    // Observe counter elements
+    document.querySelectorAll('.stat-card').forEach(card => {
+      counterObserver.observe(card);
+    });
+    
+    // Add floating animation to value icons
+    setInterval(() => {
+      const icons = document.querySelectorAll('.value-icon');
+      icons.forEach((icon, index) => {
+        setTimeout(() => {
+          icon.classList.add('floating');
+          setTimeout(() => icon.classList.remove('floating'), 1000);
+        }, index * 300);
+      });
+    }, 5000);
   });
 </script>
 
 </head><body>
+  <!-- Cute Loading Screen -->
+  <div id="page-loader" class="page-loader">
+    <div class="loader-content">
+      <div class="bouncing-text">
+        <span>H</span>
+        <span>V</span>
+        <span>A</span>
+        <span>C</span>
+      </div>
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <p>در حال بارگذاری...</p>
+    </div>
+  </div>
 
-
-
-
-
-  
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>درباره ما - شرکت صنایع تأسیسات و تهویه ایران</title>
   <meta name="description" content="آشنایی با تاریخچه، ماموریت، چشم‌انداز و ارزش‌های شرکت صنایع تأسیسات و تهویه ایران">
@@ -179,230 +319,623 @@
   <meta property="og:locale" content="fa_IR">
   <!-- Dark Mode Meta Tags -->
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#0b5fa5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#6a8fff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#121826" media="(prefers-color-scheme: dark)">
   
   <style>
-    :root{
-      --primary:#0b5fa5;
-      --accent:#ff8a00;
-      --bg:#f6f7f9;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --text:#111827;
-      --radius:10px;
-      --container:1100px;
+    /* Base Variables */
+    :root {
+      --primary: #6a8fff;
+      --primary-light: #8babff;
+      --accent: #ff9e6d;
+      --accent-light: #ffc8a8;
+      --bg: #f9f7ff;
+      --card: #ffffff;
+      --muted: #7c8ba0;
+      --text: #2d3748;
+      --radius: 16px;
+      --container: 1100px;
+      --shadow: 0 10px 30px rgba(106, 143, 255, 0.1);
+      --shadow-hover: 0 20px 40px rgba(106, 143, 255, 0.15);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
     
-    /* Dark Mode Variables */
+    /* Cute Dark Mode Variables */
     .dark-mode {
-      --primary: #3498db;
-      --accent: #f39c12;
-      --bg: #121826;
+      --primary: #8babff;
+      --primary-light: #6a8fff;
+      --accent: #ffb38a;
+      --accent-light: #ff9e6d;
+      --bg: #0f172a;
       --card: #1e293b;
       --muted: #94a3b8;
       --text: #e2e8f0;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
-
-    /* Toggle Switch */
+    
+    /* Transition class for smooth mode changes */
+    .transitioning * {
+      transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease !important;
+    }
+    
+    /* Cute Loading Animation */
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.9s ease, visibility 0.9s ease;
+    }
+    
+    .page-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .loader-content {
+      text-align: center;
+      color: white;
+    }
+    
+    .bouncing-text {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+    
+    .bouncing-text span {
+      display: inline-block;
+      animation: bounce 2s infinite;
+      margin: 0 5px;
+    }
+    
+    .bouncing-text span:nth-child(2) { animation-delay: 0.1s; }
+    .bouncing-text span:nth-child(3) { animation-delay: 0.2s; }
+    .bouncing-text span:nth-child(4) { animation-delay: 0.3s; }
+    
+    .loading-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .dot {
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    /* Animations */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* Enhanced Theme Toggle */
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
     .theme-switch {
       position: relative;
       display: inline-block;
-      width: 60px;
-      height: 30px;
-      margin-left: 10px;
+      width: 70px;
+      height: 36px;
     }
-
+    
     .theme-switch input {
       opacity: 0;
       width: 0;
       height: 0;
     }
-
-    .slider {
+    
+    .toggle-slider {
       position: absolute;
       cursor: pointer;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #0b5fa5;
-      transition: .4s;
+      background: linear-gradient(90deg, #ff9e6d, #6a8fff);
+      transition: var(--transition);
       border-radius: 34px;
     }
-
-    .slider:before {
+    
+    .toggle-slider:before {
       position: absolute;
-      content: "🌙";
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 22px;
-      width: 22px;
+      content: "☀️";
+      height: 28px;
+      width: 28px;
       left: 4px;
       bottom: 4px;
       background-color: white;
-      transition: .4s;
+      transition: var(--transition);
       border-radius: 50%;
-      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      z-index: 2;
     }
-
-    input:checked + .slider {
-      background-color: #f39c12;
+    
+    .toggle-icon {
+      transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
-
-    input:checked + .slider:before {
-      content: "☀️";
-      transform: translateX(30px);
+    
+    .toggle-icon.toggling {
+      animation: spin 0.3s ease;
     }
-
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    input:checked + .toggle-slider:before {
+      content: "🌙";
+      transform: translateX(34px);
+    }
+    
+    /* Cute Header */
+    header {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+      animation: slideInDown 0.8s ease;
+    }
+    
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .brand img {
+      height: 50px;
+      border-radius: 12px;
+      background: white;
+      padding: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: var(--transition);
+    }
+    
+    .brand img:hover {
+      transform: rotate(5deg) scale(1.05);
+    }
+    
+    /* Cute Cards with Hover Effects */
+    .card, .value-card, .team-member {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::before, .value-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover, .value-card:hover, .team-member:hover {
+      transform: translateY(-10px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .card:hover::before, .value-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    /* Team Member Hover Effect */
+    .team-member {
+      transition: var(--transition);
+    }
+    
+    .team-member img {
+      transition: var(--transition);
+    }
+    
+    .team-member:hover img {
+      transform: scale(1.05);
+    }
+    
+    /* Value Icons Animation */
+    .value-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .value-icon.floating {
+      animation: float 1s ease-in-out;
+    }
+    
+    /* Timeline Dots Animation */
+    .timeline-dot {
+      position: absolute;
+      right: -8px;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 4px solid var(--card);
+      animation: pulse 2s infinite;
+    }
+    
+    /* Cute Buttons */
+    .cta, button, .download {
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+    }
+    
+    .cta::after, button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    .cta:focus:not(:active)::after, button:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+      }
+      100% {
+        opacity: 0;
+        transform: scale(40, 40);
+      }
+    }
+    
+    .cta:hover, button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(106, 143, 255, 0.3);
+    }
+    
+    /* Cute Map Marker */
+    .cute-marker-container {
+      background: none !important;
+      border: none !important;
+    }
+    
+    .cute-marker {
+      font-size: 24px;
+      animation: bounce 2s infinite;
+      position: relative;
+    }
+    
+    .pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0.2;
+      animation: pulse 2s infinite;
+    }
+    
+    /* Statistics Animation */
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0);
+      transition: transform 0.6s ease;
+    }
+    
+    .stat-card:hover::after {
+      transform: scaleX(1);
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      transition: all 0.3s ease;
+    }
+    
+    /* Form Elements */
+    input, textarea, select {
+      transition: var(--transition);
+      border: 2px solid #e2e8f0;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(106, 143, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Footer with cute pattern */
+    footer {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, var(--primary-light), var(--accent-light));
+    }
+    
+    /* Back to Home Link */
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      transition: var(--transition);
+    }
+    
+    .back-home:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-5px);
+    }
+    
+    /* Hero Section */
+    .about-hero {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(106, 143, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 158, 109, 0.1) 0%, transparent 50%);
+    }
+    
+    /* Decorative Elements */
+    .decorative-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      opacity: 0.1;
+      z-index: -1;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .bouncing-text {
+        font-size: 2.5rem;
+      }
+      
+      .value-icon {
+        font-size: 36px;
+      }
+      
+      .stat-number {
+        font-size: 2.5rem;
+      }
+    }
+    
+    /* Add cute background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(106, 143, 255, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(255, 158, 109, 0.05) 0%, transparent 20%);
+      z-index: -1;
+    }
+    
+    /* Keep existing styles below */
     *{box-sizing:border-box}
-    body{margin:0;font-family:Tahoma, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); line-height:1.6}
-    
-    /* Header adjustments for dark mode */
-    header{background:linear-gradient(90deg,var(--primary),#0a4f8a); color:#fff; position:sticky; top:0; z-index:40; box-shadow:0 2px 8px rgba(10,20,40,0.08)}
-    .dark-mode header {
-      background: linear-gradient(90deg, #0b5fa5, #0a4f8a);
-    }
-    
+    body{margin:0;font-family:'Segoe UI', Tahoma, Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:var(--text); line-height:1.6}
     .container{max-width:var(--container); margin:0 auto; padding:0 18px}
     .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 0}
     .brand{display:flex; align-items:center; gap:12px}
-    .brand img{height:48px; border-radius:8px; background:#fff; padding:6px}
+    .brand div:first-child{font-weight:800}
+    .brand div:last-child{font-size:13px;color:rgba(255,255,255,0.85)}
     nav a{color:rgba(255,255,255,0.95); text-decoration:none; margin-left:18px; font-weight:600}
-    .cta{background:var(--accent); color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:700}
+    .cta{background:var(--accent); color:#fff; padding:12px 24px; border-radius:25px; text-decoration:none; font-weight:700}
     
-    /* Hero */
-    .about-hero{background:linear-gradient(135deg, var(--primary) 0%, #0a4f8a 100%); color:#fff; padding:80px 0 60px; margin-bottom:40px; border-radius:0 0 20px 20px; text-align:center}
-    .about-hero h1{font-size:42px; margin:0 0 16px}
-    .about-hero p{font-size:18px; max-width:800px; margin:0 auto; opacity:0.9}
+    .about-hero{background:linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color:#fff; padding:100px 0 80px; margin-bottom:40px; border-radius:0 0 30px 30px; text-align:center}
+    .about-hero h1{font-size:48px; margin:0 0 20px; animation: fadeIn 1s ease}
+    .about-hero p{font-size:20px; max-width:800px; margin:0 auto; opacity:0.95}
     
-    /* Main Content */
-    section{padding:36px 0}
-    h2{color:var(--primary); margin:0 0 24px; font-size:32px}
-    h3{color:var(--text); margin:0 0 16px; font-size:24px}
+    section{padding:60px 0}
+    h2{color:var(--primary); margin:0 0 32px; font-size:36px}
+    h3{color:var(--text); margin:0 0 20px; font-size:28px}
     
-    /* Cards */
-    .card{background:var(--card); padding:24px; border-radius:12px; box-shadow:0 6px 18px rgba(15,23,42,0.06); margin-bottom:24px}
-    .card h3{margin-top:0}
+    .card{padding:32px; margin-bottom:32px}
     
-    /* Timeline */
     .timeline{position:relative; padding-right:30px}
-    .timeline:before{content:''; position:absolute; right:0; top:0; bottom:0; width:3px; background:var(--primary)}
-    .timeline-item{position:relative; margin-bottom:32px}
+    .timeline:before{content:''; position:absolute; right:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom, var(--primary), var(--accent))}
+    .timeline-item{position:relative; margin-bottom:40px}
     .timeline-item:last-child{margin-bottom:0}
-    .timeline-dot{position:absolute; right:-8px; top:0; width:19px; height:19px; background:var(--accent); border-radius:50%; border:3px solid var(--card)}
-    .timeline-content{padding-right:28px}
-    .timeline-year{color:var(--accent); font-weight:700; margin-bottom:8px; font-size:18px}
+    .timeline-content{padding-right:32px}
+    .timeline-year{color:var(--accent); font-weight:700; margin-bottom:12px; font-size:20px}
     
-    /* Values Grid */
-    .values-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:32px}
-    .value-card{background:var(--card); padding:24px; border-radius:12px; text-align:center; box-shadow:0 6px 18px rgba(15,23,42,0.04)}
-    .value-icon{font-size:40px; margin-bottom:16px}
+    .values-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:32px; margin-top:40px}
+    .value-card{padding:32px; text-align:center}
     
-    /* Stats */
-    .stats-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:24px; margin-top:40px}
-    .stat-card{text-align:center; padding:24px; background:var(--card); border-radius:12px}
-    .stat-number{font-size:42px; font-weight:800; color:var(--primary); margin-bottom:8px}
-    .stat-label{color:var(--muted); font-size:16px}
+    .stats-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:32px; margin-top:40px}
+    .stat-card{padding:32px; text-align:center}
+    .stat-label{color:var(--muted); font-size:18px; margin-top:8px}
     
-    /* Team */
-    .team-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:24px; margin-top:32px}
-    .team-member{background:var(--card); border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(15,23,42,0.04)}
-    .team-member img{width:100%; height:240px; object-fit:cover}
+    .team-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:32px; margin-top:40px}
+    .team-member img{width:100%; height:280px; object-fit:cover; border-radius:var(--radius) var(--radius) 0 0}
     .team-member .info{padding:24px}
-    .team-member h4{margin:0 0 8px; font-size:20px}
-    .team-member .position{color:var(--accent); font-weight:600; margin-bottom:12px}
+    .team-member h4{margin:0 0 12px; font-size:22px}
+    .team-member .position{color:var(--accent); font-weight:600; margin-bottom:16px}
     
-    /* Form adjustments for dark mode */
-    input, textarea, select{width:100%; padding:10px; margin:8px 0; border:1px solid #e6e9ee; border-radius:8px; font-size:14px; background-color: white; color: #111827;}
-    .dark-mode input,
-    .dark-mode textarea,
-    .dark-mode select {
-      background-color: #2d3748;
-      border-color: #4a5568;
-      color: var(--text);
-    }
+    #osm-map {width:100%; height:300px; border-radius:var(--radius); border:2px solid rgba(106, 143, 255, 0.2); margin-top:16px}
     
-    /* OpenStreetMap Container */
-    #osm-map {
-      width: 100%;
-      height: 220px;
-      border-radius: 8px;
-      border: 1px solid #e6e9ee;
-      margin-top: 8px;
-      z-index: 1;
-    }
-    .dark-mode #osm-map {
-      border-color: #4a5568;
-    }
-    .leaflet-container {
-      font-family: inherit;
-    }
+    button{background:var(--primary); color:#fff; padding:14px 28px; border-radius:25px; font-weight:700; font-size:16px}
     
-    button{background:var(--primary); color:#fff; padding:12px 16px; border-radius:8px; border:0; font-weight:700}
-    footer{background:#0b2b45; color:#cfe8ff; padding:28px 0; margin-top:28px}
-    .footer-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px}
+    .footer-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:32px}
     
-    /* Muted text adjustments */
     .muted{color:var(--muted)}
-    .dark-mode .muted {
-      color: var(--muted);
-    }
+    .download{display:inline-block; background:var(--bg); padding:12px 24px; border-radius:25px; text-decoration:none; color:var(--text); border:2px solid var(--primary); transition:var(--transition)}
+    .download:hover{background:var(--primary); color:white; transform:translateY(-3px)}
     
-    /* Back to Home */
-    .back-home{display:inline-flex; align-items:center; gap:8px; color:var(--primary); text-decoration:none; font-weight:600; margin-bottom:24px}
-    .back-home:hover{text-decoration:underline}
-    
-    /* Responsive */
-    @media(max-width:980px){ .about-hero{padding:60px 0 40px} }
+    @media(max-width:980px){ .about-hero{padding:80px 0 60px} }
     @media(max-width:768px){ 
-      .about-hero h1{font-size:32px}
+      .about-hero h1{font-size:36px}
       .stats-grid{grid-template-columns:repeat(2, 1fr)}
+      section{padding:40px 0}
     }
     @media(max-width:520px){ 
       nav a{display:none} 
       .topbar{justify-content:space-between}
       .stats-grid{grid-template-columns:1fr}
-      .about-hero{padding:40px 0 30px}
-    }
-    
-    /* small helpers */
-    .badge{display:inline-block;background:#eef6ff;color:var(--primary);padding:6px 10px;border-radius:999px;font-weight:700}
-    .download{display:inline-block;background:#f3f4f6;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--text);border:1px solid #e6e9ee}
-    .dark-mode .download {
-      background: #2d3748;
-      border-color: #4a5568;
+      .about-hero{padding:60px 0 40px}
+      .about-hero h1{font-size:28px}
     }
   </style>
-
 
   <header>
     <div class="container topbar">
       <div class="brand">
         <img src="file:///D:/logo-placeholder.png" alt="لوگو شرکت">
         <div>
-          <div style="font-weight:800">شرکت صنایع تأسیسات و تهویه ایران</div>
-          <div style="font-size:13px;color:rgba(255,255,255,0.85)">پیشرو در راهکارهای تهویه و تأسیسات صنعتی</div>
+          <div>شرکت صنایع تأسیسات و تهویه ایران</div>
+          <div>پیشرو در راهکارهای تهویه و تأسیسات صنعتی</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:20px">
         <nav aria-label="منوی اصلی">
-          <a href="main.html">خانه</a>
-          <a href="about.html" style="color:#ff8a00;font-weight:700">درباره ما</a>
-          <a href="main.html#products">محصولات</a>
-          <a href="main.html#projects">پروژه‌ها</a>
-          <a href="main.html#services">خدمات</a>
-          <a href="main.html#contact">تماس</a>
+          <a href="main.html">🏠 خانه</a>
+          <a href="about.html" style="color:var(--accent);font-weight:700">📖 درباره ما</a>
+          <a href="main.html#products">📦 محصولات</a>
+          <a href="main.html#projects">🏗️ پروژه‌ها</a>
+          <a href="main.html#services">🛠️ خدمات</a>
+          <a href="main.html#contact">📞 تماس</a>
         </nav>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:13px; color:rgba(255,255,255,0.9)">حالت تاریک</span>
+        <div class="theme-switch-wrapper">
+          <span style="font-size:14px; color:rgba(255,255,255,0.9)">حالت تاریک</span>
           <label class="theme-switch" aria-label="تغییر حالت تاریک/روشن">
             <input type="checkbox" id="darkModeToggle">
-            <span class="slider"></span>
+            <span class="toggle-slider"></span>
           </label>
+          <span class="toggle-icon">☀️</span>
         </div>
-        <a class="cta" href="main.html#contact">درخواست مشاوره</a>
+        <a class="cta" href="main.html#contact">💬 درخواست مشاوره</a>
       </div>
     </div>
   </header>
@@ -412,7 +945,7 @@
     <section class="about-hero">
       <div class="container">
         <a href="main.html" class="back-home">← بازگشت به صفحه اصلی</a>
-        <h1>درباره ما</h1>
+        <h1>درباره ما ✨</h1>
         <p>با بیش از دو دهه تجربه در صنعت تأسیسات و تهویه، ما متعهد به ارائه راهکارهای نوین و استانداردهای بین‌المللی هستیم</p>
       </div>
     </section>
@@ -420,7 +953,7 @@
     <!-- About Content -->
     <section id="history">
       <div class="card">
-        <h2>تاریخچه شرکت</h2>
+        <h2>📜 تاریخچه شرکت</h2>
         <p><strong>شرکت صنایع تأسیسات و تهویه ایران</strong> در سال ۱۳۸۰ با هدف ارائه خدمات تخصصی در زمینه طراحی و اجرای سیستم‌های تهویه مطبوع و تأسیسات صنعتی تأسیس شد. از ابتدای فعالیت، تمرکز ما بر ارائه راهکارهای بومی‌سازی شده متناسب با شرایط اقلیمی و نیازهای صنعتی کشور بوده است.</p>
         
         <div class="timeline">
@@ -465,26 +998,26 @@
 
     <!-- Mission & Vision -->
     <section id="mission-vision">
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:32px;">
         <div class="card">
-          <h2>ماموریت ما</h2>
+          <h2>🎯 ماموریت ما</h2>
           <p>ارائه راهکارهای جامع و نوین در حوزه تأسیسات و تهویه با هدف:</p>
-          <ul style="padding-right:20px; line-height:2">
-            <li>تأمین محیطی سالم و ایمن برای صنایع و ساختمان‌ها</li>
-            <li>بهینه‌سازی مصرف انرژی و کاهش هزینه‌های عملیاتی</li>
-            <li>رعایت استانداردهای بین‌المللی و الزامات زیست‌محیطی</li>
-            <li>ارائه خدمات پس از فروش مستمر و قابل اتکا</li>
+          <ul style="padding-right:24px; line-height:2.2">
+            <li>✨ تأمین محیطی سالم و ایمن برای صنایع و ساختمان‌ها</li>
+            <li>💡 بهینه‌سازی مصرف انرژی و کاهش هزینه‌های عملیاتی</li>
+            <li>🏆 رعایت استانداردهای بین‌المللی و الزامات زیست‌محیطی</li>
+            <li>🤝 ارائه خدمات پس از فروش مستمر و قابل اتکا</li>
           </ul>
         </div>
         
         <div class="card">
-          <h2>چشم‌انداز</h2>
+          <h2>🔭 چشم‌انداز</h2>
           <p>تبدیل شدن به شرکت پیشرو در ارائه راهکارهای تهویه و تأسیسات در سطح منطقه تا سال ۱۴۱۰ با اهداف زیر:</p>
-          <ul style="padding-right:20px; line-height:2">
-            <li>افزایش سهم بازار به ۲۵٪ در صنایع پتروشیمی و نیروگاهی</li>
-            <li>توسعه صادرات خدمات فنی و مهندسی به ۵ کشور همسایه</li>
-            <li>راه‌اندازی مرکز تحقیق و توسعه برای بومی‌سازی فناوری‌های روز</li>
-            <li>کسب رضایت ۹۵٪ مشتریان از کیفیت خدمات</li>
+          <ul style="padding-right:24px; line-height:2.2">
+            <li>📈 افزایش سهم بازار به ۲۵٪ در صنایع پتروشیمی و نیروگاهی</li>
+            <li>🌍 توسعه صادرات خدمات فنی و مهندسی به ۵ کشور همسایه</li>
+            <li>🔬 راه‌اندازی مرکز تحقیق و توسعه برای بومی‌سازی فناوری‌های روز</li>
+            <li>⭐ کسب رضایت ۹۵٪ مشتریان از کیفیت خدمات</li>
           </ul>
         </div>
       </div>
@@ -492,49 +1025,49 @@
 
     <!-- Company Values -->
     <section id="values">
-      <h2>ارزش‌های سازمانی</h2>
+      <h2>💝 ارزش‌های سازمانی</h2>
       <div class="values-grid">
         <div class="value-card">
           <div class="value-icon">✅</div>
           <h3>تعهد به کیفیت</h3>
-          <p>کیفیت برتر در تمامی مراحل طراحی، تولید و اجرا به عنوان اصلی‌ترین ارزش سازمانی</p>
+          <p class="muted">کیفیت برتر در تمامی مراحل طراحی، تولید و اجرا به عنوان اصلی‌ترین ارزش سازمانی</p>
         </div>
         
         <div class="value-card">
           <div class="value-icon">🤝</div>
           <h3>صداقت و شفافیت</h3>
-          <p>رابطه‌ای صادقانه و شفاف با مشتریان، تأمین‌کنندگان و همکاران</p>
+          <p class="muted">رابطه‌ای صادقانه و شفاف با مشتریان، تأمین‌کنندگان و همکاران</p>
         </div>
         
         <div class="value-card">
           <div class="value-icon">🌱</div>
           <h3>مسئولیت‌پذیری زیست‌محیطی</h3>
-          <p>تعهد به توسعه پایدار و کاهش تأثیرات منفی بر محیط زیست</p>
+          <p class="muted">تعهد به توسعه پایدار و کاهش تأثیرات منفی بر محیط زیست</p>
         </div>
         
         <div class="value-card">
           <div class="value-icon">🚀</div>
           <h3>نوآوری و یادگیری</h3>
-          <p>ترویج فرهنگ نوآوری، یادگیری مستمر و به‌روزرسانی دانش فنی</p>
+          <p class="muted">ترویج فرهنگ نوآوری، یادگیری مستمر و به‌روزرسانی دانش فنی</p>
         </div>
         
         <div class="value-card">
           <div class="value-icon">👥</div>
           <h3>کار تیمی</h3>
-          <p>همکاری مؤثر و احترام متقابل به عنوان کلید موفقیت پروژه‌ها</p>
+          <p class="muted">همکاری مؤثر و احترام متقابل به عنوان کلید موفقیت پروژه‌ها</p>
         </div>
         
         <div class="value-card">
           <div class="value-icon">💪</div>
           <h3>پایداری و قابلیت اطمینان</h3>
-          <p>تضمین پایداری سیستم‌ها و قابلیت اطمینان در بلندمدت</p>
+          <p class="muted">تضمین پایداری سیستم‌ها و قابلیت اطمینان در بلندمدت</p>
         </div>
       </div>
     </section>
 
     <!-- Statistics -->
     <section id="stats">
-      <h2>در یک نگاه</h2>
+      <h2>📊 در یک نگاه</h2>
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-number">۲۰+</div>
@@ -570,13 +1103,13 @@
 
     <!-- Management Team -->
     <section id="management-team">
-      <h2>تیم مدیریت ارشد</h2>
+      <h2>👥 تیم مدیریت ارشد</h2>
       <div class="team-grid">
         <div class="team-member">
           <img src="file:///D:/ceo.jpg" alt="مدیر عامل">
           <div class="info">
             <h4>مهندس علی رضایی</h4>
-            <div class="position">مدیر عامل</div>
+            <div class="position">👑 مدیر عامل</div>
             <p class="muted">دارای ۲۵ سال سابقه در مدیریت پروژه‌های بزرگ صنعتی، فارغ‌التحصیل دانشگاه تهران در رشته مکانیک</p>
           </div>
         </div>
@@ -585,7 +1118,7 @@
           <img src="file:///D:/cto.jpg" alt="مدیر فنی">
           <div class="info">
             <h4>مهندس سارا موسوی</h4>
-            <div class="position">مدیر فنی</div>
+            <div class="position">⚙️ مدیر فنی</div>
             <p class="muted">متخصص سیستم‌های HVAC با ۱۸ سال تجربه، عضو انجمن مهندسین مکانیک ایران</p>
           </div>
         </div>
@@ -594,7 +1127,7 @@
           <img src="file:///D:/pm.jpg" alt="مدیر پروژه">
           <div class="info">
             <h4>مهندس فریبرز جنایت کنار</h4>
-            <div class="position">مدیر پروژه</div>
+            <div class="position">📋 مدیر پروژه</div>
             <p class="muted">مدیریت موفق ۱۰۰+ پروژه صنعتی، دارنده گواهینامه PMP از موسسه PMI آمریکا</p>
           </div>
         </div>
@@ -603,7 +1136,7 @@
           <img src="file:///D:/finance.jpg" alt="مدیر مالی">
           <div class="info">
             <h4>مهندس محمد حسینی</h4>
-            <div class="position">مدیر مالی و اداری</div>
+            <div class="position">💰 مدیر مالی و اداری</div>
             <p class="muted">کارشناس ارشد مدیریت مالی، دارای ۱۵ سال تجربه در مدیریت مالی شرکت‌های صنعتی</p>
           </div>
         </div>
@@ -612,30 +1145,30 @@
 
     <!-- Certifications -->
     <section id="certifications">
-      <h2>گواهی‌نامه‌ها و استانداردها</h2>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px;">
+      <h2>🏆 گواهی‌نامه‌ها و استانداردها</h2>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px;">
         <div class="card" style="text-align:center">
           <h3>ISO 9001:2015</h3>
           <p class="muted">سیستم مدیریت کیفیت</p>
-          <a class="download" href="file:///D:/iso9001.pdf" style="margin-top:12px">دانلود گواهی</a>
+          <a class="download" href="file:///D:/iso9001.pdf" style="margin-top:16px">📥 دانلود گواهی</a>
         </div>
         
         <div class="card" style="text-align:center">
           <h3>ISO 14001:2015</h3>
           <p class="muted">سیستم مدیریت زیست محیطی</p>
-          <a class="download" href="file:///D:/iso14001.pdf" style="margin-top:12px">دانلود گواهی</a>
+          <a class="download" href="file:///D:/iso14001.pdf" style="margin-top:16px">📥 دانلود گواهی</a>
         </div>
         
         <div class="card" style="text-align:center">
           <h3>ISO 45001:2018</h3>
           <p class="muted">ایمنی و سلامت شغلی</p>
-          <a class="download" href="file:///D:/iso45001.pdf" style="margin-top:12px">دانلود گواهی</a>
+          <a class="download" href="file:///D:/iso45001.pdf" style="margin-top:16px">📥 دانلود گواهی</a>
         </div>
         
         <div class="card" style="text-align:center">
           <h3>گواهی صلاحیت</h3>
           <p class="muted">سازمان مدیریت و برنامه‌ریزی</p>
-          <a class="download" href="file:///D:/competency.pdf" style="margin-top:12px">دانلود گواهی</a>
+          <a class="download" href="file:///D:/competency.pdf" style="margin-top:16px">📥 دانلود گواهی</a>
         </div>
       </div>
     </section>
@@ -643,47 +1176,47 @@
     <!-- Contact Info -->
     <section id="contact-info">
       <div class="card">
-        <h2>اطلاعات تماس</h2>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px;">
+        <h2>📞 اطلاعات تماس</h2>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:32px;">
           <div>
-            <h3>دفتر مرکزی</h3>
-            <p class="muted">تهران، خیابان مثال، پلاک ۱۲۳</p>
-            <p class="muted">کد پستی: ۱۲۳۴۵۶۷۸۹۰</p>
-            <p class="muted">تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</p>
-            <p class="muted">فکس: ۰۲۱-۱۲۳۴۵۶۷۹</p>
-            <p class="muted">ایمیل: info@hvaciran.com</p>
+            <h3>🏢 دفتر مرکزی</h3>
+            <p class="muted">📍 تهران، خیابان مثال، پلاک ۱۲۳</p>
+            <p class="muted">📮 کد پستی: ۱۲۳۴۵۶۷۸۹۰</p>
+            <p class="muted">📞 تلفن: ۰۲۱-۱۲۳۴۵۶۷۸</p>
+            <p class="muted">📠 فکس: ۰۲۱-۱۲۳۴۵۶۷۹</p>
+            <p class="muted">📧 ایمیل: info@hvaciran.com</p>
           </div>
           
           <div>
-            <h3>ساعات کاری</h3>
+            <h3>⏰ ساعات کاری</h3>
             <p class="muted">شنبه تا چهارشنبه: ۸:۳۰ تا ۱۷:۳۰</p>
             <p class="muted">پنجشنبه: ۸:۳۰ تا ۱۳:۳۰</p>
             <p class="muted">جمعه‌ها و تعطیلات رسمی: تعطیل</p>
             
-            <h3 style="margin-top:24px">پشتیبانی فوری</h3>
-            <p class="muted">شماره تماس اضطراری: ۰۹۱۲۱۲۳۴۵۶۷</p>
-            <p class="muted">پشتیبانی ۲۴ ساعته پروژه‌های جاری</p>
+            <h3 style="margin-top:24px">🚨 پشتیبانی فوری</h3>
+            <p class="muted">📱 شماره تماس اضطراری: ۰۹۱۲۱۲۳۴۵۶۷</p>
+            <p class="muted">۲۴ ساعته برای پروژه‌های جاری ⭐</p>
           </div>
         </div>
         
-        <div style="margin-top:24px">
-          <strong>موقعیت دفتر مرکزی روی نقشه</strong>
-          <div id="osm-map" style="height:300px; margin-top:12px"></div>
-          <div style="font-size:12px; color:var(--muted); margin-top:4px; text-align:center">
-            برای اطلاعات بیشتر با ما تماس بگیرید یا از فرم تماس در صفحه اصلی استفاده کنید
+        <div style="margin-top:32px">
+          <h3>🗺️ موقعیت دفتر مرکزی روی نقشه</h3>
+          <div id="osm-map"></div>
+          <div style="font-size:14px; color:var(--muted); margin-top:12px; text-align:center">
+            برای اطلاعات بیشتر با ما تماس بگیرید یا از فرم تماس در صفحه اصلی استفاده کنید ✨
           </div>
         </div>
       </div>
     </section>
 
     <!-- Call to Action -->
-    <section style="text-align:center; padding:48px 0">
-      <h2>همکاری با ما</h2>
-      <p style="max-width:600px; margin:0 auto 24px">ما همواره به دنبال جذب استعدادهای درخشان و ایجاد همکاری‌های سازنده با شرکت‌ها و سازمان‌های هم‌فکر هستیم.</p>
-      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
-        <a class="cta" href="main.html#contact">ارسال رزومه</a>
-        <a class="download" href="main.html#contact">درخواست همکاری تجاری</a>
-        <a class="download" href="main.html#products">مشاهده محصولات</a>
+    <section style="text-align:center; padding:60px 0">
+      <h2>🤝 همکاری با ما</h2>
+      <p style="max-width:600px; margin:0 auto 32px">ما همواره به دنبال جذب استعدادهای درخشان و ایجاد همکاری‌های سازنده با شرکت‌ها و سازمان‌های هم‌فکر هستیم.</p>
+      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap">
+        <a class="cta" href="main.html#contact">📝 ارسال رزومه</a>
+        <a class="download" href="main.html#contact">🤝 درخواست همکاری تجاری</a>
+        <a class="download" href="main.html#products">📦 مشاهده محصولات</a>
       </div>
     </section>
   </main>
@@ -693,31 +1226,31 @@
       <div>
         <strong>شرکت صنایع تأسیسات و تهویه ایران</strong>
         <div class="muted">پیشرو در راهکارهای نوین تأسیسات و تهویه از سال ۱۳۸۰</div>
-        <div class="muted" style="font-size:12px; margin-top:5px;">
+        <div class="muted" style="font-size:12px; margin-top:8px;">
           نقشه با <a href="https://leafletjs.com/" style="color:inherit">Leaflet</a> و 
           <a href="https://www.openstreetmap.org/" style="color:inherit">OpenStreetMap</a>
         </div>
       </div>
       <div>
-        <strong>لینک‌های سریع</strong>
+        <strong>🔗 لینک‌های سریع</strong>
         <div class="muted">
-          <a href="main.html" style="color:inherit;text-decoration:none">صفحه اصلی</a> • 
-          <a href="about.html" style="color:inherit;text-decoration:none">درباره ما</a> • 
-          <a href="main.html#products" style="color:inherit;text-decoration:none">محصولات</a> • 
-          <a href="main.html#projects" style="color:inherit;text-decoration:none">پروژه‌ها</a>
+          <a href="main.html" style="color:inherit;text-decoration:none">🏠 صفحه اصلی</a> • 
+          <a href="about.html" style="color:inherit;text-decoration:none">📖 درباره ما</a> • 
+          <a href="main.html#products" style="color:inherit;text-decoration:none">📦 محصولات</a> • 
+          <a href="main.html#projects" style="color:inherit;text-decoration:none">🏗️ پروژه‌ها</a>
         </div>
       </div>
       <div>
-        <strong>دریافت بروشور</strong>
-        <a class="download" href="file:///D:/catalog.pdf">دانلود بروشور شرکت</a>
-        <div style="margin-top:8px">
-          <a class="download" href="file:///D:/company-profile.pdf">پروفایل شرکت (PDF)</a>
+        <strong>📄 دریافت بروشور</strong>
+        <a class="download" href="file:///D:/catalog.pdf">📥 دانلود بروشور شرکت</a>
+        <div style="margin-top:12px">
+          <a class="download" href="file:///D:/company-profile.pdf">📄 پروفایل شرکت (PDF)</a>
         </div>
       </div>
     </div>
-    <div style="text-align:center;margin-top:18px;color:#9fc7ff">
+    <div style="text-align:center;margin-top:32px;color:#9fc7ff">
       کلیه حقوق مادی و معنوی این وب‌سایت محفوظ می‌باشد. © ۱۴۰۳
-      <div style="margin-top:8px">ساخته شده با ❤ توسط برسام</div>
+      <div style="margin-top:12px">ساخته شده با ❤ توسط برسام</div>
     </div>
   </footer>
 
